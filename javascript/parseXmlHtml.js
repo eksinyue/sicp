@@ -191,14 +191,19 @@ const processTextFunctionsDefaultHtml = {
 
   DISPLAYFOOTNOTE: (node, writeTo) => {
     display_footnote_count += 1;
-    if (display_footnote_count == 1) {writeTo.push("<hr>");}
-    writeTo.push("<div class='footnote'>");
+    if (display_footnote_count == 1) {writeTo.push("<hr>\n");}
+    writeTo.push(`
+    <div class='footnote'>`);
     writeTo.push(`
       <a class='footnote-number' id='footnote-${display_footnote_count}' href='#footnote-link-${display_footnote_count}'>`);
-    writeTo.push(`[${display_footnote_count}] </a><FOOTNOTE>`);
+    writeTo.push(`[${display_footnote_count}] </a>
+    <FOOTNOTE>
+    `);
     recursiveProcessTextHtml(node.firstChild, writeTo);
-    writeTo.push("</FOOTNOTE>");
-    writeTo.push("</div>");
+    writeTo.push(`
+    </FOOTNOTE></div>
+
+    `);
   },
 
   H2: (node, writeTo) => {
@@ -288,7 +293,7 @@ const processTextFunctionsDefaultHtml = {
 
   JAVASCRIPTINLINE: (node, writeTo) => {
     writeTo.push("<kbd>");
-    recursiveProcessPureText(node.firstChild, writeTo, { removeNewline: true });
+    recursiveProcessPureText(node.firstChild, writeTo, { removeNewline: "all" });
     writeTo.push("</kbd>");
   },
 
@@ -299,7 +304,7 @@ const processTextFunctionsDefaultHtml = {
       writeTo.push("<kbd class='snippet'>");
       const textit = getChildrenByTagName(node, "JAVASCRIPT")[0];
       if (textit) {
-        recursiveProcessPureText(textit.firstChild, writeTo, { removeNewline: false });
+        recursiveProcessPureText(textit.firstChild, writeTo, { removeNewline: "beginning&end" });
       } else {
         recursiveProcessTextHtml(node.firstChild, writeTo);
       }
@@ -438,15 +443,24 @@ const processTextFunctionsSplit = {
   FOOTNOTE: (node, writeTo) => {
     footnote_count += 1;
     writeTo.push(`<a class='superscript' id='footnote-link-${footnote_count}' href='#footnote-${footnote_count}'`);
+    
     if (ancestorHasTag(node, "SCHEME")) {
       writeTo.push(`style="color:teal"`);
     } else if (ancestorHasTag(node, "JAVASCRIPT")) {
       writeTo.push(`style="color:blue"`);
     }
+
     writeTo.push(`>[${footnote_count}]</a>`);
     // clone the current FOOTNOTE node and its children
     let cloneNode = node.cloneNode(true);
     cloneNode.nodeName = "DISPLAYFOOTNOTE";
+    
+    if (ancestorHasTag(node, "SCHEME")) {
+      cloneNode.setAttribute("version", "scheme");
+    } else if (ancestorHasTag(node, "JAVASCRIPT")) {
+      cloneNode.setAttribute("version", "js");
+    }
+
     let parent = node.parentNode;
     // the last parentNode is <#document> the second last node is either <CHAPTER>/<(SUB)SECTION>
     while (parent.parentNode.parentNode) {
@@ -456,6 +470,32 @@ const processTextFunctionsSplit = {
     parent.appendChild(cloneNode); 
   },
 
+  DISPLAYFOOTNOTE: (node, writeTo) => {
+    display_footnote_count += 1;
+    if (display_footnote_count == 1) {writeTo.push("<hr>\n");}
+    writeTo.push(`
+    <div class='footnote'>`);
+    if (node.getAttribute("version") == "scheme") {
+      writeTo.push(`<span style="color:teal">`);
+    } else if (node.getAttribute("version") == "js") {
+      writeTo.push(`<span style="color:blue">`);
+    }
+    writeTo.push(`
+      <a class='footnote-number' id='footnote-${display_footnote_count}' href='#footnote-link-${display_footnote_count}'>`);
+    writeTo.push(`[${display_footnote_count}] </a>
+    <FOOTNOTE>
+    `);
+    recursiveProcessTextHtml(node.firstChild, writeTo);
+    writeTo.push(`
+    </FOOTNOTE>`);
+    if (node.getAttribute("version")) {
+      writeTo.push(`</span>`);
+    }
+    writeTo.push(`</div>
+    
+    `);
+  },
+
   SNIPPET: (node, writeTo) => {
     if (node.getAttribute("HIDE") == "yes") {
       return;
@@ -463,7 +503,7 @@ const processTextFunctionsSplit = {
       writeTo.push("<kbd class='snippet'>");
       const textit = getChildrenByTagName(node, "JAVASCRIPT")[0];
       if (textit) {
-        recursiveProcessPureText(textit.firstChild, writeTo, { removeNewline: false });
+        recursiveProcessPureText(textit.firstChild, writeTo, { removeNewline: "beginning&end" });
       } else {
         recursiveProcessTextHtml(node.firstChild, writeTo);
       }
