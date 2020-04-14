@@ -174,12 +174,16 @@ async function recursiveTranslateXml(filepath, option) {
   files.forEach(file => {
     if (file.match(/\.xml$/)) {
       // console.log(file + " being processed");
-      if (option == "generateTOC") {
-        allFilepath.push(path.join(filepath, file.replace(/\.xml$/, "") + ".html"));
-      };
-      promises.push(
-        translateXml(filepath, file, option)
-      );
+      if (parseType == "web" && file.match(/indexpreface/)) {
+        // remove index section for web textbook
+      } else {
+        if (option == "generateTOC") {
+          allFilepath.push(path.join(filepath, file.replace(/\.xml$/, "") + ".html"));
+        };
+        promises.push(
+          translateXml(filepath, file, option)
+        );
+      }
     } else if (fs.lstatSync(path.join(fullPath, file)).isDirectory()) {
       promises.push(
         recursiveTranslateXml(path.join(filepath, file), option)
@@ -290,6 +294,7 @@ async function main() {
     allFilepath = sortTOC(allFilepath);
     console.log(tableOfContent);
     //console.log(allFilepath);
+    //console.log(allFilepath.slice(50));
     createIndexHtml();
 
     console.log("setup snippets and references\n");

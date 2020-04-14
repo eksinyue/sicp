@@ -406,10 +406,11 @@ const processTextFunctionsSplit = {
     const js = getChildrenByTagName(node, "JAVASCRIPT")[0];
     if (scheme && js) {
       writeTo.push(`<table width="100%">
-        <colgroup><col width="48%"><col width="52%"></colgroup>
+        <colgroup><col width="48%"><col width="1%"><col width="51%"></colgroup>
         <tr>
-          <td class="meta" style = "color:grey; text-align: center">Scheme version</td>
-          <td class="meta" style = "color:grey; text-align: center">JavaScript version</td>
+          <td class="meta" style = "color:grey; text-align: center">Original</td>
+          <td></td>
+          <td class="meta" style = "color:grey; text-align: center">JavaScript</td>
         </tr>`);
       writeTo.push(`
         <tr>
@@ -419,6 +420,7 @@ const processTextFunctionsSplit = {
       writeTo.push(`</span>`);
     
       writeTo.push(`    </td>
+          <td></td>
           <td>`);
       writeTo.push(`<span style="color:blue">`);
       recursiveProcessTextHtml(js.firstChild, writeTo)
@@ -431,6 +433,27 @@ const processTextFunctionsSplit = {
     } else if (scheme) {
       recursiveProcessTextHtml(scheme.firstChild, writeTo);
     }
+  },
+
+  FOOTNOTE: (node, writeTo) => {
+    footnote_count += 1;
+    writeTo.push(`<a class='superscript' id='footnote-link-${footnote_count}' href='#footnote-${footnote_count}'`);
+    if (ancestorHasTag(node, "SCHEME")) {
+      writeTo.push(`style="color:teal"`);
+    } else if (ancestorHasTag(node, "JAVASCRIPT")) {
+      writeTo.push(`style="color:blue"`);
+    }
+    writeTo.push(`>[${footnote_count}]</a>`);
+    // clone the current FOOTNOTE node and its children
+    let cloneNode = node.cloneNode(true);
+    cloneNode.nodeName = "DISPLAYFOOTNOTE";
+    let parent = node.parentNode;
+    // the last parentNode is <#document> the second last node is either <CHAPTER>/<(SUB)SECTION>
+    while (parent.parentNode.parentNode) {
+      parent = parent.parentNode;
+    }
+    // append the cloned node as the last elements inside <CHAPTER>/<SECTION> node
+    parent.appendChild(cloneNode); 
   },
 
   SNIPPET: (node, writeTo) => {
@@ -584,7 +607,7 @@ const afterContent = (writeTo) => {
       ${chapterIndex + " " + chapterTitle}
     </div>
     <script> var chapter_id = ${chapArrIndex + 1}; </script>
-    <script> var chapter_path = "${chapterIndex}.html"; </script>
+    <script> var chapter_path = "chapters/${chapterIndex}.html"; </script>
     <div class='next-page'></div>
     </div>
     </div> <!-- /.container -->
