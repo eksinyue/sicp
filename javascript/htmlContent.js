@@ -1,3 +1,21 @@
+const shortTitleDefault = `SICP &mdash; JS`;
+const longTitleDefault = `Structure and Interpretation of Computer Programs &mdash; JavaScript Adaptation`;
+let shortTitle = shortTitleDefault;
+let longTitle = longTitleDefault;
+
+export const switchTitle = (version) => {
+  if (version == "js") {
+    shortTitle = shortTitleDefault;
+    longTitle = longTitleDefault;
+  } else if (version == "split") {
+    shortTitle = `SICP &mdash; Scheme/JS`;
+    longTitle = `Structure and Interpretation of Computer Programs &mdash; Orginal/JavaScript Adaptation Comparison`;
+  } else if (version == "scheme") {
+    console.log('generate sicp schceme web textook')
+  }
+}
+
+
 // `\\\\`' is used to display double back-slash \\ in template literals
 export const html_links_part1 = `<!DOCTYPE html>
 <html lang="en">
@@ -78,9 +96,8 @@ export const html_links_part2  = (writeTo, toIndexFolder) => {
        <button id="btn" class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav-sidebar" aria-controls="nav-sidebar" aria-expanded="false" aria-label="Toggle navigation" title="navigation">
          <span class="navbar-toggler-icon"></span>
        </button>
-       <span class="navbar-brand-short"><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">SICP &mdash; JS</a></span>
-       <span class="navbar-brand-long" ><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">Structure and Interpretation
-            of Computer Programs &mdash; JavaScript Adaptation</a></span>
+       <span class="navbar-brand-short"><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">${shortTitle}</a></span>
+       <span class="navbar-brand-long" ><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">${longTitle}</a></span>
 
        <!-- edit the search engine by visiting: 
 	    https://cse.google.com/cse/setup/basic?cx=015760785273492757659:nc_tznrzlsg 
@@ -138,6 +155,10 @@ export const indexPage = `
 	  <BR/>
 	  <div class="title-text-ALSO">
 	    <span class="title-text-ALSO">also available</span><BR/>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+	    <span class="title-text-OTHEREDITIONS">
+	  <a href="https://sicp.comp.nus.edu.sg>Orignal/Javascript Adaption Split Version</a></span>
 	  </div>
 	  <div class="title-text-OTHEREDITIONS">
 	    <span class="title-text-OTHEREDITIONS">

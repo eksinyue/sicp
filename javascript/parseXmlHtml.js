@@ -454,10 +454,7 @@ const processTextFunctionsSplit = {
     if (scheme && js) {
       writeTo.push(`<table width="100%">
           <colgroup><col width="48%"><col width="52%"></colgroup>
-          <tr>
-            <td class="meta" style = "color:grey; text-align: center">Scheme version</td>
-            <td class="meta" style = "color:grey; text-align: center">JavaScript version</td>
-          </tr>`);
+          `);
         writeTo.push(`
           <tr>
             <td>`);

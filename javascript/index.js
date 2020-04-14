@@ -20,6 +20,7 @@ $dvi_mode = 0;
 $postscript_mode = 0;`;
 
 // html (web version)
+import { switchTitle } from './htmlContent';
 import { switchParseFunctionsHtml, parseXmlHtml } from './parseXmlHtml';
 import { setupSnippetsHtml } from './processingFunctions/processSnippetHtml';
 import { setupReferences } from './processingFunctions/processReferenceHtml';
@@ -281,6 +282,7 @@ async function main() {
     }
 
     switchParseFunctionsHtml(version);
+    switchTitle(version);
     createMain();
     
     console.log("\ngenerate table of content\n")
