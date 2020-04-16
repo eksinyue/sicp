@@ -2,6 +2,7 @@ DOCS = docs
 
 all: web pdf epub
 	cp latex/sicpjs.pdf latex/sicp.epub $(DOCS); 
+
 web:
 	npm start web
 	cd sicpjs_html

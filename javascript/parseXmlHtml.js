@@ -20,6 +20,7 @@ import {
 
 let paragraph_count = 0;
 let heading_count = 0;
+let subsubsection_count = 0;
 let footnote_count = 0;
 let snippet_count = 0;
 let exercise_count = 0;
@@ -44,7 +45,9 @@ const tagsToRemoveDefault = new Set([
   "SOLUTION",
   "INDEX",
   "NAME",
-  "LABEL"
+  "LABEL",
+  "CODEINDEX",
+  "EXPLANATION"
 ]);
 // SOLUTION tag handled by processSnippet
 
@@ -111,7 +114,7 @@ const processTextFunctionsDefaultHtml = {
     `);
     
     if (node.getAttribute("WIP") === "yes") {
-         writeTo.push(`<div class="wip-stamp">Note: this section is a work in progress!</div>`)
+         writeTo.push(`<div style="color:red" class="wip-stamp">Note: this section is a work in progress!</div>`)
     }
     let childNode = node.firstChild;
     while (childNode.nodeName != "NAME") {
@@ -123,6 +126,10 @@ const processTextFunctionsDefaultHtml = {
   REFERENCES: (node, writeTo) => processTextFunctionsHtml["ABOUT"](node, writeTo),
   WEBPREFACE: (node, writeTo) => processTextFunctionsHtml["ABOUT"](node, writeTo),
   MATTER: (node, writeTo) => processTextFunctionsHtml["ABOUT"](node, writeTo),
+
+  APOS: (node, writeTo) => {
+    writeTo.push("'");
+  },
 
   br: (node, writeTo) => {
     writeTo.push("<br>");
@@ -146,7 +153,7 @@ const processTextFunctionsDefaultHtml = {
     `);
 
     if (node.getAttribute("WIP") === "yes") {
-      writeTo.push(`<div class="wip-stamp">Note: this section is a work in progress!</div>`)
+      writeTo.push(`<div style="color:red" class="wip-stamp">Note: this section is a work in progress!</div>`)
  }
     let childNode = node.firstChild;
     while (childNode.nodeName != "NAME") {
@@ -160,6 +167,12 @@ const processTextFunctionsDefaultHtml = {
     node.nodeName = "EM";
     processTextHtml(node, writeTo);
   },
+
+  EM_NO_INDEX: (node, writeTo) => {
+    node.nodeName = "EM";
+    processTextHtml(node, writeTo);
+  },
+
 
   EPIGRAPH: (node, writeTo) => {
     processEpigraphHtml(node, writeTo);
@@ -278,7 +291,7 @@ const processTextFunctionsDefaultHtml = {
     `);
     
     if (node.getAttribute("WIP") === "yes") {
-         writeTo.push(`<div class="wip-stamp">Note: this section is a work in progress!</div>`)
+         writeTo.push(`<div style="color:red" class="wip-stamp">Note: this section is a work in progress!</div>`)
     }
     let childNode = node.firstChild;
     while (childNode.nodeName != "NAME") {
@@ -292,9 +305,13 @@ const processTextFunctionsDefaultHtml = {
     processTextFunctionsHtml["JAVASCRIPTINLINE"](node, writeTo),
 
   JAVASCRIPTINLINE: (node, writeTo) => {
-    writeTo.push("<kbd>");
-    recursiveProcessPureText(node.firstChild, writeTo, { removeNewline: "all" });
-    writeTo.push("</kbd>");
+    if(ancestorHasTag(node, "NAME")){
+      recursiveProcessPureText(node.firstChild, writeTo, { removeNewline: "all" });
+    } else {
+      writeTo.push("<kbd>");
+      recursiveProcessPureText(node.firstChild, writeTo, { removeNewline: "all" });
+      writeTo.push("</kbd>"); 
+    }
   },
 
   SNIPPET: (node, writeTo) => {
@@ -351,7 +368,7 @@ const processTextFunctionsDefaultHtml = {
     `);
     
     if (node.getAttribute("WIP") === "yes") {
-      writeTo.push(`<div class="wip-stamp">Note: this section is a work in progress!</div>`)
+      writeTo.push(`<div style="color:red" class="wip-stamp">Note: this section is a work in progress!</div>`)
     }
     let childNode = node.firstChild;
     while (childNode.nodeName != "NAME") {
@@ -371,12 +388,15 @@ const processTextFunctionsDefaultHtml = {
     writeTo.push("</h2></div>");
   },
 
+  // e.g. section 4.4.4
   SUBSUBSECTION: (node, writeTo) => {
+    subsubsection_count += 1;
     heading_count += 1;
     writeTo.push(`
       <div class='permalink'>
-        <a name='h${heading_count}' class='permalink'></a><h1>
+        <a name='sec${chapterIndex}.${subsubsection_count}' class='permalink'></a><h1>
     `);
+    writeTo.push(`${chapterIndex}.${subsubsection_count} `);
     recursiveProcessTextHtml(node.firstChild, writeTo);
     writeTo.push("</h1></div>");
   },
@@ -481,8 +501,13 @@ const processTextFunctionsSplit = {
       writeTo.push(`<span style="color:blue">`);
     }
     writeTo.push(`
-      <a class='footnote-number' id='footnote-${display_footnote_count}' href='#footnote-link-${display_footnote_count}'>`);
-    writeTo.push(`[${display_footnote_count}] </a>
+      <a class='footnote-number' id='footnote-${display_footnote_count}' href='#footnote-link-${display_footnote_count}' `);
+    if (node.getAttribute("version") == "scheme") {
+      writeTo.push(`style="color:teal"`);
+    } else if (node.getAttribute("version") == "js") {
+      writeTo.push(`style="color:blue"`);
+    }
+      writeTo.push(`>[${display_footnote_count}] </a>
     <FOOTNOTE>
     `);
     recursiveProcessTextHtml(node.firstChild, writeTo);
@@ -672,6 +697,7 @@ export const parseXmlHtml = (doc, writeTo, filename) => {
   footnote_count = 0;
   display_footnote_count = 0;
   heading_count = 0;
+  subsubsection_count = 0;
   snippet_count = 0;
   exercise_count = 0;
   chapArrIndex = allFilepath.indexOf(filename);
