@@ -12,7 +12,7 @@ const title = `\\begin{titlepage}
   {\\large with Liu Hang, Feng Piaopiao, Jolyn Tan and Chan Ger Hean \\\\
    — \\textit{adapters to JavaScript}\\par}
   \\end{flushright}
-\\end{titlepage}`
+\\end{titlepage}`;
 
 export const preamble = `\\documentclass[a4paper, 12pt]{report}
 \\usepackage[T1]{fontenc}
@@ -70,7 +70,7 @@ export const preamble = `\\documentclass[a4paper, 12pt]{report}
 }
 
 \\usepackage{graphicx}
-\\graphicspath{ {../rails/public/chapters/} }
+\\graphicspath{ {../static/} }
 
 \\usepackage[answerdelayed]{exercise}
 \\newcounter{ExerciseDisplayNumber}[chapter]

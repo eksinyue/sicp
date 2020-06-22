@@ -1,3 +1,88 @@
+import { write } from "fs-extra";
+
+const shortTitleDefault = `SICP &mdash; JS`;
+const longTitleDefault = `Structure and Interpretation of Computer Programs &mdash; JavaScript Adaptation`;
+let shortTitle = shortTitleDefault;
+let longTitle = longTitleDefault;
+let this_edition = `
+<div class="title-text-EDITION">
+	    <span class="title-text-EDITION">Mobile-friendly Web Edition</span>
+	  </div>`;
+let legend = `
+<div class="title-text-ALSO">
+  <span class="title-text-ALSO">also available</span><BR/>
+</div>
+<div class="title-text-OTHEREDITIONS">
+  <span class="title-text-OTHEREDITIONS">
+<a href="sicpjs.pdf">PDF edition</a></span>
+</div>
+<div class="title-text-OTHEREDITIONS">
+  <span class="title-text-OTHEREDITIONS">
+<a href="sicpjs.epub">E-book edition</a></span>
+<div class="title-text-OTHEREDITIONS">
+  <span class="title-text-OTHEREDITIONS">
+<a href="split">Comparison edition</a></span>
+</div>`;
+
+export const switchTitle = version => {
+  if (version == "js") {
+    shortTitle = shortTitleDefault;
+    longTitle = longTitleDefault;
+    this_edition = `
+    <div class="title-text-EDITION">
+       <span class="title-text-EDITION">Mobile-friendly Web Edition</span>
+    </div>`;
+    legend = `
+    <div class="title-text-ALSO">
+      <span class="title-text-ALSO">also available</span><BR/>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+    <a href="sicpjs.pdf">PDF edition</a></span>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+    <a href="sicpjs.epub">E-book edition</a></span>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+    <a href="split">Comparison edition</a></span>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+    <a href="sicpjs.zip">All programs zipped</a></span>
+    </div>`;
+  } else if (version == "split") {
+    shortTitle = `SICP &mdash; Scheme/JS`;
+    longTitle = `Structure and Interpretation of Computer Programs &mdash; Comparison Edition`;
+    this_edition = `
+    <div class="title-text-EDITION">
+       <span class="title-text-EDITION">Scheme-JavaScript Comparison Edition</span>
+    </div>`;
+    legend = `
+    <div class="title-text-ALSO">
+      <span class="title-text-ALSO">Differences highlighted in</span><BR/>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+      <span style="color:teal">Original █</span>
+      </span>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+      <span style="color:blue">Javascript █</span>
+      </span>
+    </div>
+    <div class="title-text-OTHEREDITIONS">
+      <span class="title-text-OTHEREDITIONS">
+    <a href="..">Back to web edition</a></span>
+    </div>`;
+  } else if (version == "scheme") {
+    // scheme version of the web textbook has yet been developed
+    console.log("generate sicp schceme web textook");
+  }
+};
+
 // `\\\\`' is used to display double back-slash \\ in template literals
 export const html_links_part1 = `<!DOCTYPE html>
 <html lang="en">
@@ -5,9 +90,9 @@ export const html_links_part1 = `<!DOCTYPE html>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  `
-export const html_links_part2  = (writeTo, toIndexFolder) => {
-  writeTo.push(  `
+  `;
+export const html_links_part2 = (writeTo, toIndexFolder) => {
+  writeTo.push(`
   <meta name="csrf-param" content="authenticity_token" />
   <meta name="csrf-token" content="EMTEijVc2kiiKUH4nYH0lQG3pLPfMowQ/Stg//t6DCo0e5pWMQwamnTvIdmVZqY/MqSx2IYYE+2bpNV6UNSMwQ==" />
 
@@ -21,9 +106,10 @@ export const html_links_part2  = (writeTo, toIndexFolder) => {
 
 <!--    <link rel="shortcut icon" type="image/png" href="${toIndexFolder}images/lambda.png" /> -->
 
-    <!-- for support of progressive web app, see github README -->
+    <!-- for support of progressive web app, see github README, DISABLED!
     <link rel="manifest" href="${toIndexFolder}static/manifest.json">
-  
+    -->
+
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" 
 		     	  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
 	          crossorigin="anonymous">
@@ -64,7 +150,7 @@ export const html_links_part2  = (writeTo, toIndexFolder) => {
   <body>
 
     
-    <!-- support for progressive web app, see README -->
+    <!-- support for progressive web app, see README, DISABLED
     <script>
       if ('serviceWorker' in navigator && !navigator.serviceWorker.controller) {
           navigator.serviceWorker.register("../sw.js").then(function(reg) {
@@ -72,15 +158,14 @@ export const html_links_part2  = (writeTo, toIndexFolder) => {
           });
       }
     </script>
-
+    -->
 
      <nav class="navbar navbar-expand-sm navbar-dark bg-dark fixed-top justify-content-between">
        <button id="btn" class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#nav-sidebar" aria-controls="nav-sidebar" aria-expanded="false" aria-label="Toggle navigation" title="navigation">
          <span class="navbar-toggler-icon"></span>
        </button>
-       <span class="navbar-brand-short"><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">SICP &mdash; JS</a></span>
-       <span class="navbar-brand-long" ><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">Structure and Interpretation
-            of Computer Programs &mdash; JavaScript Adaptation</a></span>
+       <span class="navbar-brand-short"><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">${shortTitle}</a></span>
+       <span class="navbar-brand-long" ><a title="Go back to front page" href="${toIndexFolder}index.html" class="gray">${longTitle}</a></span>
 
        <!-- edit the search engine by visiting: 
 	    https://cse.google.com/cse/setup/basic?cx=015760785273492757659:nc_tznrzlsg 
@@ -121,45 +206,35 @@ export const html_links_part2  = (writeTo, toIndexFolder) => {
      
      <div class="container scroll">
 
-      `);}
+     `);
+};
 
-
-export const indexPage = `
+export const indexPage = writeTo => {
+  writeTo.push(`
   <TABLE class="tight">
 	<TD  class="tight" width="70%" valign="top" align="right">
           <img class="tight" src="./sicp.png"
 	       height="auto" width="100%">
 	</TD>
 	<TD  class="tight" width="30%" valign="top" align="left">
-	  <div class="title-text-EDITION">
-	    <span class="title-text-EDITION">Mobile-friendly Web Edition</span>
-	  </div>
+	  ${this_edition}
 	  <span style="vertical-align:-77%"/>
 	  <BR/>
-	  <div class="title-text-ALSO">
-	    <span class="title-text-ALSO">also available</span><BR/>
-	  </div>
-	  <div class="title-text-OTHEREDITIONS">
-	    <span class="title-text-OTHEREDITIONS">
-	  <a href="https://sicp.comp.nus.edu.sg/sicpjs.pdf">PDF edition</a></span>
-	  </div>
-	  <div class="title-text-OTHEREDITIONS">
-	    <span class="title-text-OTHEREDITIONS">
-	  <a href="https://sicp.comp.nus.edu.sg/sicp.epub">E-book edition</a></span>
-	  </div>
+	  ${legend}
 	</TD>
       </TR>
     </TABLE>
     
     <div class="title-text-ATTRIBUTION">
-      <span class="title-text-AUTHOR">Harold Abelson and Gerald Jay Sussman<br/>with Julie Sussman</span> <span class="title-text-TITLE">authors</span>
+      <span class="title-text-AUTHOR">Martin Henz and Tobias Wrigstad<br/>with Chan Ger Hean, He Xinyue, Liu Hang, Feng Piaopiao, Jolyn Tan and Wang Qian</span> <span class="title-text-TITLE">adapters to JavaScript</span>
     </div>
 
     <div class="title-text-ATTRIBUTION">
-      <span class="title-text-AUTHOR">Martin Henz and Tobias Wrigstad<br/>with Chan Ger Hean, Feng Piaopiao, Jolyn Tan and Liu Hang</span> <span class="title-text-TITLE">adapters to JavaScript</span>
+      <span class="title-text-TITLE">original textbook by</span> <span class="title-text-AUTHOR">Harold Abelson and Gerald Jay Sussman<br/>with Julie Sussman</span>
     </div>
-    `
 
+    `);
+};
 
 export const beforeContentWrapper = `<div id='permalink-msg'>
 <div class='screen'>
@@ -169,4 +244,4 @@ export const beforeContentWrapper = `<div id='permalink-msg'>
 </div>
 </div>
 <div class='chapter-content'>
-`
+`;
